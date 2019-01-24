@@ -2,6 +2,8 @@ import React from 'react'
 import {withStyles} from '@material-ui/core/styles';
 import Player from './Player'
 import DutchSpace from './DutchSpace'
+import {Meteor} from "meteor/meteor";
+import { withTracker } from 'meteor/react-meteor-data';
 
 const styles = {
     field: {
@@ -24,18 +26,38 @@ const styles = {
     },
 };
 
-const Field = ({classes, playing}) => {
+let Field = ({classes, playing, bots}) => {
     return(
         <div style={{backgroundColor: playing ? '#b3b3b3' : '#ffdb96'}} className={classes.field}>
-            <Player id={1} name='BOT 1'/>
-            <Player id={2} name='BOT 2'/>
+            <Player id={1} isBot botId={bots[1]} />
+            <Player id={2} isBot botId={bots[2]} />
 
             <DutchSpace/>
 
-            <Player id={3} name='BOT 3'/>
-            <Player id={4} name={'ME'}/>
+            <Player id={3} isBot botId={bots[3]} />
+            <Player id={4} />
         </div>
     );
 };
+
+Field = withTracker(({name}) => {
+    console.log(Meteor.user());
+
+    setTimeout(()=>{
+        const user = Meteor.users.find({}, {fields: {emails:1}}).fetch();
+        console.log(user);
+    }, 500)
+
+
+
+    return {
+        name: name, //Meteor.user(),
+        bots: {
+            1: 'a',
+            2: 'b',
+            3: 'c'
+        }
+    };
+})(Field);
 
 export default withStyles(styles)(Field);

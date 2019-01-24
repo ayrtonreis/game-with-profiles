@@ -1,10 +1,13 @@
 import React from 'react'
 import {withStyles} from '@material-ui/core/styles';
+import Avatar from '@material-ui/core/Avatar';
 import WoodPile from './WoodPile'
 import PostPile from './PostPile'
 import BlitzPile from './BlitzPile'
 import {cardClicked, plusWoodPileClicked} from "../redux/cards/action";
 import {connect} from "react-redux";
+import {Meteor} from "meteor/meteor";
+import { withTracker } from 'meteor/react-meteor-data';
 
 const styles = {
     player: {
@@ -33,42 +36,33 @@ const styles = {
     }
 };
 
-let PlayerHeader = ({name = 'Player Name', classes}) => {
-    return (
-        <div className={classes.header}>
-            {name}
-        </div>
-    );
-};
-PlayerHeader = withStyles(styles)(PlayerHeader);
 
-let PlayerSpace = ({classes, id}) => {
-    return (
-        <div className={classes.space}>
-            <WoodPile cardOwnerId={id}/>
-            <PostPile cardOwnerId={id}/>
-            <BlitzPile cardOwnerId={id}/>
-        </div>
-    );
-};
-PlayerSpace = withStyles(styles)(PlayerSpace);
+let Player = ({classes, id, name, onClick, avatar}) => {
+    return(
+        <div className={classes.player}>
 
-let PlayerFooter = ({classes, id, onClick}) => {
-    return (
-        <div className={classes.playerFooter}>
-            <button
-                style={{fontSize: '8px'}}
-                onClick={onClick}
-            >+</button>
+            <div className={classes.header}>
+                <Avatar src={`avatars/${avatar}.png`} />
+                {name}
+            </div>
+
+            <div className={classes.space}>
+                <WoodPile cardOwnerId={id}/>
+                <PostPile cardOwnerId={id}/>
+                <BlitzPile cardOwnerId={id}/>
+            </div>
+
+            <div className={classes.playerFooter}>
+                <button
+                    style={{fontSize: '8px'}}
+                    onClick={onClick}
+                >+</button>
+            </div>
         </div>
     );
 };
 
-PlayerFooter = withStyles(styles)(PlayerFooter);
-
-function mapStateToProps(state, ownProps){
-    return {};
-}
+Player = withStyles(styles)(Player);
 
 function mapDispatchToProps(dispatch, ownProps){
     const {id: cardOwnerId} = ownProps;
@@ -77,19 +71,35 @@ function mapDispatchToProps(dispatch, ownProps){
     }
 }
 
-PlayerFooter = connect(mapStateToProps, mapDispatchToProps)(PlayerFooter);
+Player = connect(null, mapDispatchToProps)(Player);
+
+const tracker = ({isBot, botId}) => {
+    Meteor.subscribe('users');
 
 
-let Player = ({classes, id, name}) => {
-    return(
-        <div className={classes.player}>
-            <PlayerHeader name={name}/>
-            <PlayerSpace id={id}/>
-            <PlayerFooter id={id}/>
-        </div>
-    );
+    if (isBot) {
+        return {
+            name: botId,
+            avatar: '01'
+        }
+    }
+    else {
+        if(Meteor.user()){
+            const user = Meteor.users.find({_id: Meteor.user()._id}).count();
+            // console.log(user.userAvatar)
+
+
+        }
+
+
+        return {
+            name: 'me',
+            avatar: '05'
+        }
+    }
+
 };
 
-Player = withStyles(styles)(Player);
+Player = withTracker(tracker)(Player);
 
 export default Player;
