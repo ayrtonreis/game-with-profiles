@@ -112,7 +112,7 @@ const tracker = ({isBot, botId}) => {
     else {
         try {
             const userLabel = user.nickname || user.name || user.emails[0].address;
-            console.warn(userLabel);
+            console.warn(user.name);
             if(userLabel){
                 return {
                     name: userLabel.toString(),

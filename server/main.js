@@ -1,13 +1,14 @@
 import { Meteor } from 'meteor/meteor';
 import BotsCollection from '/imports/api/bots';
 
-function insertBot({id: _id, name, speedLevel, visionLevel}) {
-    BotsCollection.insert({ _id, name, speedLevel, visionLevel, createdAt: new Date() });
+function insertBot({id: _id, name, avatar, speedLevel, visionLevel}) {
+    BotsCollection.insert({ _id, name, avatar, speedLevel, visionLevel, createdAt: new Date() });
 }
 
 Meteor.startup(() => {
   //If the Bots collection is empty, add some data.
   if (BotsCollection.find().count() === 0) {
+      
     insertBot({
         id: 'bot1',
         name: 'Silly Bot',
@@ -41,7 +42,8 @@ Meteor.startup(() => {
         try{
             return Meteor.users.find({_id: this.userId}, {fields: {
                     '_id': true,
-                    'userName': true,
+                    'name': true,
+                    'nickname': true,
                     'createdAt': true,
                     'userAvatar': true,
                     'favoriteBots': true,
