@@ -5,11 +5,13 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import Switch from '@material-ui/core/Switch';
 import { Redirect, Link } from "react-router-dom";
 import AccountsUIWrapper from './AccountsUIWrapper.js';
+import { withTracker } from 'meteor/react-meteor-data';
+import {Meteor} from "meteor/meteor";
+import {Avatar} from "@material-ui/core/umd/material-ui.production.min";
 
 const styles = {
     root: {
@@ -22,22 +24,75 @@ const styles = {
         marginLeft: -12,
         marginRight: 20,
     },
+    avatar:{
+        width: '25px',
+        height: '25px',
+        marginRight: '10px'
+    }
 };
 
 class MenuAppBar extends React.Component {
     constructor(props){
         super(props);
 
-        this.state = {goToProfile: false};
-
-        this.handleMenu = this.handleMenu.bind(this);
+        //this.state = {goToProfile: false};
+        //this.handleMenu = this.handleMenu.bind(this);
     }
 
-    handleMenu(){
-        this.setState({
-            goToProfile: true
-        })
+    static defaultProps = {
+        goBackTo: null,
+        showProfileAvatar: false,
     };
+
+    // handleMenu(){
+    //     this.setState({
+    //         goToProfile: true
+    //     })
+    // };
+
+    goBackLink(){
+
+        if(this.props.goBackTo){
+            const { classes } = this.props;
+
+            return(
+                <Link to={this.props.goBackTo}>
+                    <IconButton className={classes.menuButton} color="inherit" aria-label="Menu">
+                        <ArrowBackIcon />
+                    </IconButton>
+                </Link>
+            );
+        }
+        else
+            return '';
+    }
+
+    profileLink(){
+
+        if(this.props.showProfileAvatar){
+            const { classes } = this.props;
+
+
+            return(
+                <Link to='/profile'>
+                    {this.props.userAvatar ?
+                        <Avatar src={`avatars/${this.props.userAvatar}.png`} className={this.props.classes.avatar} />
+                        :
+                        <IconButton
+                            aria-owns={open ? 'menu-appbar' : undefined}
+                            aria-haspopup="true"
+                            // onClick={this.handleMenu}
+                            color="inherit"
+                        >
+                            <AccountCircle />
+                        </IconButton>
+                    }
+                </Link>
+            );
+        }
+        else
+            return '';
+    }
 
     render() {
         // if (this.state.goToProfile === true) {
@@ -50,25 +105,15 @@ class MenuAppBar extends React.Component {
             <div className={classes.root}>
                 <AppBar position="static" style={{backgroundColor: "#ffb97c"}}>
                     <Toolbar>
-                        <IconButton className={classes.menuButton} color="inherit" aria-label="Menu">
-                            <MenuIcon />
-                        </IconButton>
+
+                        {this.goBackLink()}
+
                         <Typography variant="h6" color="inherit" className={classes.grow}>
-                            Photos
+                            Dutch Blitz Game
                         </Typography>
 
-                        <div>
-                            <Link to='/profile'>
-                                <IconButton
-                                    aria-owns={open ? 'menu-appbar' : undefined}
-                                    aria-haspopup="true"
-                                    // onClick={this.handleMenu}
-                                    color="inherit"
-                                >
-                                    <AccountCircle />
-                                </IconButton>
-                            </Link>
-                        </div>
+                        {this.profileLink()}
+
                         <div><AccountsUIWrapper/></div>
                     </Toolbar>
                 </AppBar>
@@ -81,4 +126,25 @@ MenuAppBar.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(MenuAppBar);
+MenuAppBar = withStyles(styles)(MenuAppBar)
+
+MenuAppBar = withTracker(() => {
+    Meteor.subscribe("userInfo");
+
+    const user = Meteor.user();
+    let userAvatar = null;
+
+
+    if(user !== null){
+        try {
+            userAvatar = user.avatar;
+        }
+        catch (e) {}
+    }
+
+    return {
+        userAvatar
+    };
+})(MenuAppBar);
+
+export default MenuAppBar;

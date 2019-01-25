@@ -29,7 +29,7 @@ class Game extends React.Component {
 
         return(
             <div>
-                <TopBar/>
+                <TopBar showProfileAvatar/>
                 <div className={classes.gameWrapper}>
                     <div></div>
                     <div className={classes.game}>

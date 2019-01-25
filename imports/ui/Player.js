@@ -100,7 +100,7 @@ const tracker = ({isBot, botId}) => {
     if (isBot) {
         try {
             const botObj = (BotsCollection.find({_id: botId}).fetch())[0];
-            console.warn('BOT FOUND: ', botObj.name, botObj.avatar)
+
 
             return {
                 name: botObj.name,
@@ -112,11 +112,11 @@ const tracker = ({isBot, botId}) => {
     else {
         try {
             const userLabel = user.nickname || user.name || user.emails[0].address;
-            console.warn(user.name);
+
             if(userLabel){
                 return {
                     name: userLabel.toString(),
-                    avatar: '01'
+                    avatar: user.avatar || '01',
                 }
             }
         }

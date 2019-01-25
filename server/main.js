@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import BotsCollection from '/imports/api/bots';
+import '../imports/api/users.js';
 
 function insertBot({id: _id, name, avatar, speedLevel, visionLevel}) {
     BotsCollection.insert({ _id, name, avatar, speedLevel, visionLevel, createdAt: new Date() });
@@ -45,7 +46,7 @@ Meteor.startup(() => {
                     'name': true,
                     'nickname': true,
                     'createdAt': true,
-                    'userAvatar': true,
+                    'avatar': true,
                     'favoriteBots': true,
                     'emails': true,
                 }});

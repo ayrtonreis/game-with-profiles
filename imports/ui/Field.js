@@ -48,29 +48,35 @@ Field = withStyles(styles)(Field);
 
 Field = withTracker(() => {
     Meteor.subscribe("userInfo");
-    console.warn(Meteor.user());
+    //console.warn(Meteor.user());
 
-    if(Meteor.user() === null)
+    const user = Meteor.user();
+
+    if(user === null)
         return {};
+    else if(user){
 
-    const bots = {
-        1: 'a',
-        2: 'b',
-        3: 'c'
+    }
+
+    let bots = {
+        1: 'bot1',
+        2: 'bot2',
+        3: 'bot3'
     };
 
     try {
-        if(Meteor.user().userAvatar){
+        if(Meteor.user().avatar){
             const favBots = Meteor.user().favoriteBots;
 
             if(favBots){
-                bots[1] = favBots[1] || bots[1];
-                bots[2] = favBots[2] || bots[2];
-                bots[3] = favBots[3] || bots[3];
+                bots[1] = favBots[0] || bots[1];
+                bots[2] = favBots[1] || bots[2];
+                bots[3] = favBots[2] || bots[3];
             }
         }
     }
     catch (e) {}
+
 
     return {
         bots
