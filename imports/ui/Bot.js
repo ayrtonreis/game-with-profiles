@@ -14,6 +14,10 @@ class Bot extends React.Component {
         this.interval = setInterval(() => this.setState({ time: Date.now() }), 1000 * delaySec);  // the setInterval function uses milliseconds
     }
 
+    componentWillUnmount () {
+        clearInterval(this.interval);
+    }
+
     render () {
 
         const {

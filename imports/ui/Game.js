@@ -3,15 +3,21 @@ import {withStyles} from '@material-ui/core/styles';
 import Options from './Options'
 import Field from './Field'
 import Bots from './Bots'
+import TopBar from './TopBar'
 import {selectIsPlaying} from "../redux/playing";
 import {connect} from 'react-redux';
 
 const styles = {
+    gameWrapper:{
+        display: 'grid',
+        alignItems: 'center',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+    },
     game: {
         display: 'grid',
         gridGap: '4px',
         padding: '10px',
-        gridTemplateColumns: '100px 600px'
+        gridTemplateColumns: '100px 600px',
     },
 };
 
@@ -22,12 +28,18 @@ class Game extends React.Component {
         const {classes, playing} = this.props;
 
         return(
-            <div className={classes.game}>
-                <Options />
+            <div>
+                <TopBar/>
+                <div className={classes.gameWrapper}>
+                    <div></div>
+                    <div className={classes.game}>
+                        <Options />
 
-                <Field playing={playing} />
+                        <Field playing={playing} />
 
-                <Bots />
+                        <Bots />
+                    </div>
+                </div>
             </div>
         );
     };

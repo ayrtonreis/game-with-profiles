@@ -1,10 +1,14 @@
 import React from 'react'
 import {withStyles} from '@material-ui/core/styles';
+import Avatar from '@material-ui/core/Avatar';
 import WoodPile from './WoodPile'
 import PostPile from './PostPile'
 import BlitzPile from './BlitzPile'
 import {cardClicked, plusWoodPileClicked} from "../redux/cards/action";
 import {connect} from "react-redux";
+import {Meteor} from "meteor/meteor";
+import { withTracker } from 'meteor/react-meteor-data';
+import BotsCollection from '../api/bots'
 
 const styles = {
     player: {
@@ -14,7 +18,10 @@ const styles = {
     },
 
     header: {
-        backgroundColor: 'rgba(255, 255, 255, 0.6)'
+        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+        display: 'grid',
+        gridTemplateColumns: '50px auto',
+        alignItems: 'center'
     },
 
     space: {
@@ -33,42 +40,45 @@ const styles = {
     }
 };
 
-let PlayerHeader = ({name = 'Player Name', classes}) => {
-    return (
-        <div className={classes.header}>
-            {name}
+
+let Player = ({
+                  classes,
+                  id = null,
+                  name = null,
+                  onClick,
+                  avatar = null,
+}) => {
+    const isPlayerValid = id && name && avatar;
+
+    return(
+        <div className={classes.player}>
+            {   isPlayerValid ?
+
+                <div className={classes.header}>
+                    <div><Avatar src={`avatars/${avatar}.png`} /></div>
+
+                    <div>{name}</div>
+                </div>
+
+                : ''
+            }
+            <div className={classes.space}>
+                <WoodPile cardOwnerId={id}/>
+                <PostPile cardOwnerId={id}/>
+                <BlitzPile cardOwnerId={id}/>
+            </div>
+
+            <div className={classes.playerFooter}>
+                <button
+                    style={{fontSize: '8px'}}
+                    onClick={onClick}
+                >+</button>
+            </div>
         </div>
     );
 };
-PlayerHeader = withStyles(styles)(PlayerHeader);
 
-let PlayerSpace = ({classes, id}) => {
-    return (
-        <div className={classes.space}>
-            <WoodPile cardOwnerId={id}/>
-            <PostPile cardOwnerId={id}/>
-            <BlitzPile cardOwnerId={id}/>
-        </div>
-    );
-};
-PlayerSpace = withStyles(styles)(PlayerSpace);
-
-let PlayerFooter = ({classes, id, onClick}) => {
-    return (
-        <div className={classes.playerFooter}>
-            <button
-                style={{fontSize: '8px'}}
-                onClick={onClick}
-            >+</button>
-        </div>
-    );
-};
-
-PlayerFooter = withStyles(styles)(PlayerFooter);
-
-function mapStateToProps(state, ownProps){
-    return {};
-}
+Player = withStyles(styles)(Player);
 
 function mapDispatchToProps(dispatch, ownProps){
     const {id: cardOwnerId} = ownProps;
@@ -77,19 +87,45 @@ function mapDispatchToProps(dispatch, ownProps){
     }
 }
 
-PlayerFooter = connect(mapStateToProps, mapDispatchToProps)(PlayerFooter);
+Player = connect(null, mapDispatchToProps)(Player);
 
+const tracker = ({isBot, botId}) => {
+    const user = Meteor.user();
+    Meteor.subscribe("bots");
 
-let Player = ({classes, id, name}) => {
-    return(
-        <div className={classes.player}>
-            <PlayerHeader name={name}/>
-            <PlayerSpace id={id}/>
-            <PlayerFooter id={id}/>
-        </div>
-    );
+    // Checks if the user is logged
+    if(!user)
+        return {};
+
+    if (isBot) {
+        try {
+            const botObj = (BotsCollection.find({_id: botId}).fetch())[0];
+            console.warn('BOT FOUND: ', botObj.name, botObj.avatar)
+
+            return {
+                name: botObj.name,
+                avatar: botObj.avatar,
+            }
+        }
+        catch (e) {}
+    }
+    else {
+        try {
+            const userLabel = user.nickname || user.name || user.emails[0].address;
+            console.warn(user.name);
+            if(userLabel){
+                return {
+                    name: userLabel.toString(),
+                    avatar: '01'
+                }
+            }
+        }
+        catch (e) {}
+    }
+
+    return {};
 };
 
-Player = withStyles(styles)(Player);
+Player = withTracker(tracker)(Player);
 
 export default Player;
