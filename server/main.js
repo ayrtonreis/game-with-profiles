@@ -1,34 +1,55 @@
 import { Meteor } from 'meteor/meteor';
-import Links from '/imports/api/bots';
+import BotsCollection from '/imports/api/bots';
 
-function insertLink(title, url) {
-  Links.insert({ title, url, createdAt: new Date() });
+function insertBot({id: _id, name, speedLevel, visionLevel}) {
+    BotsCollection.insert({ _id, name, speedLevel, visionLevel, createdAt: new Date() });
 }
 
 Meteor.startup(() => {
-  // If the Links collection is empty, add some data.
-  // if (Links.find().count() === 0) {
-  //   insertLink(
-  //     'Do the Tutorial',
-  //     'https://www.meteor.com/tutorials/react/creating-an-app'
-  //   );
-  //
-  //   insertLink(
-  //     'Follow the Guide',
-  //     'http://guide.meteor.com'
-  //   );
-  //
-  //   insertLink(
-  //     'Read the Docs',
-  //     'https://docs.meteor.com'
-  //   );
-  //
-  //   insertLink(
-  //     'Discussions',
-  //     'https://forums.meteor.com'
-  //   );
-  // }
-    Meteor.publish("user", function () {
-        return SvseTree.find({},{fields: {field:1}});
+  //If the Bots collection is empty, add some data.
+  if (BotsCollection.find().count() === 0) {
+    insertBot({
+        id: 'bot1',
+        name: 'Silly Bot',
+        avatar: '02',
+        speedLevel: 1,
+        visionLevel: 2,
     });
+      insertBot({
+          id: 'bot2',
+          name: 'Smart Bot',
+          avatar: '01',
+          speedLevel: 4,
+          visionLevel: 4,
+      });
+      insertBot({
+          id: 'bot3',
+          name: 'Genius Bot',
+          avatar: '06',
+          speedLevel: 5,
+          visionLevel: 5,
+      });
+      insertBot({
+          id: 'bot4',
+          name: 'Friendly Bot',
+          avatar: '04',
+          speedLevel: 2,
+          visionLevel: 3,
+      });
+  }
+    Meteor.publish("userInfo", function (userId) {
+        try{
+            return Meteor.users.find({_id: this.userId}, {fields: {
+                    '_id': true,
+                    'userName': true,
+                    'createdAt': true,
+                    'userAvatar': true,
+                    'favoriteBots': true,
+                    'emails': true,
+                }});
+        }catch(error){
+            console.log(error);
+        }
+    });
+
 });

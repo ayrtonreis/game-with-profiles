@@ -8,6 +8,7 @@ import {cardClicked, plusWoodPileClicked} from "../redux/cards/action";
 import {connect} from "react-redux";
 import {Meteor} from "meteor/meteor";
 import { withTracker } from 'meteor/react-meteor-data';
+import BotsCollection from '../api/bots'
 
 const styles = {
     player: {
@@ -17,7 +18,10 @@ const styles = {
     },
 
     header: {
-        backgroundColor: 'rgba(255, 255, 255, 0.6)'
+        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+        display: 'grid',
+        gridTemplateColumns: '50px auto',
+        alignItems: 'center'
     },
 
     space: {
@@ -37,15 +41,27 @@ const styles = {
 };
 
 
-let Player = ({classes, id, name, onClick, avatar}) => {
+let Player = ({
+                  classes,
+                  id = null,
+                  name = null,
+                  onClick,
+                  avatar = null,
+}) => {
+    const isPlayerValid = id && name && avatar;
+
     return(
         <div className={classes.player}>
+            {   isPlayerValid ?
 
-            <div className={classes.header}>
-                <Avatar src={`avatars/${avatar}.png`} />
-                {name}
-            </div>
+                <div className={classes.header}>
+                    <div><Avatar src={`avatars/${avatar}.png`} /></div>
 
+                    <div>{name}</div>
+                </div>
+
+                : ''
+            }
             <div className={classes.space}>
                 <WoodPile cardOwnerId={id}/>
                 <PostPile cardOwnerId={id}/>
@@ -74,30 +90,40 @@ function mapDispatchToProps(dispatch, ownProps){
 Player = connect(null, mapDispatchToProps)(Player);
 
 const tracker = ({isBot, botId}) => {
-    Meteor.subscribe('users');
+    const user = Meteor.user();
+    Meteor.subscribe("bots");
 
+    // Checks if the user is logged
+    if(!user)
+        return {};
 
     if (isBot) {
-        return {
-            name: botId,
-            avatar: '01'
+        try {
+            const botObj = (BotsCollection.find({_id: botId}).fetch())[0];
+            console.warn('BOT FOUND: ', botObj.name, botObj.avatar)
+
+            return {
+                name: botObj.name,
+                avatar: botObj.avatar,
+            }
         }
+        catch (e) {}
     }
     else {
-        if(Meteor.user()){
-            const user = Meteor.users.find({_id: Meteor.user()._id}).count();
-            // console.log(user.userAvatar)
-
-
+        try {
+            const userLabel = user.nickname || user.name || user.emails[0].address;
+            console.warn(userLabel);
+            if(userLabel){
+                return {
+                    name: userLabel.toString(),
+                    avatar: '01'
+                }
+            }
         }
-
-
-        return {
-            name: 'me',
-            avatar: '05'
-        }
+        catch (e) {}
     }
 
+    return {};
 };
 
 Player = withTracker(tracker)(Player);

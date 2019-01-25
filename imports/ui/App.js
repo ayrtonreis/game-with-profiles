@@ -3,7 +3,7 @@ import Game from './Game'
 import {Meteor} from 'meteor/meteor'
 
 import { withTracker } from 'meteor/react-meteor-data';
-import Links from '../api/bots.js'
+import Bots from '../api/bots.js'
 
 import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 import Profile from "./Profile";
@@ -44,7 +44,7 @@ class App extends Component {
 
 App = withTracker(() => {
     return {
-        links: Links.find({}).fetch(),
+        links: Bots.find({}).fetch(),
     };
 })(App);
 

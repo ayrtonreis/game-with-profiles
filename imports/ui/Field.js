@@ -26,7 +26,11 @@ const styles = {
     },
 };
 
-let Field = ({classes, playing, bots}) => {
+let Field = ({
+                 classes,
+                 playing,
+                 bots = {1: null, 2: null, 3: null}
+}) => {
     return(
         <div style={{backgroundColor: playing ? '#b3b3b3' : '#ffdb96'}} className={classes.field}>
             <Player id={1} isBot botId={bots[1]} />
@@ -40,24 +44,37 @@ let Field = ({classes, playing, bots}) => {
     );
 };
 
-Field = withTracker(({name}) => {
-    console.log(Meteor.user());
+Field = withStyles(styles)(Field);
 
-    setTimeout(()=>{
-        const user = Meteor.users.find({}, {fields: {emails:1}}).fetch();
-        console.log(user);
-    }, 500)
+Field = withTracker(() => {
+    Meteor.subscribe("userInfo");
+    console.warn(Meteor.user());
 
+    if(Meteor.user() === null)
+        return {};
 
+    const bots = {
+        1: 'a',
+        2: 'b',
+        3: 'c'
+    };
+
+    try {
+        if(Meteor.user().userAvatar){
+            const favBots = Meteor.user().favoriteBots;
+
+            if(favBots){
+                bots[1] = favBots[1] || bots[1];
+                bots[2] = favBots[2] || bots[2];
+                bots[3] = favBots[3] || bots[3];
+            }
+        }
+    }
+    catch (e) {}
 
     return {
-        name: name, //Meteor.user(),
-        bots: {
-            1: 'a',
-            2: 'b',
-            3: 'c'
-        }
+        bots
     };
 })(Field);
 
-export default withStyles(styles)(Field);
+export default Field;
